@@ -13,7 +13,7 @@ export const connect = async () => {
 
   try {
     await mongoose.connect(!process.env.MONGODB_URI, {
-      dbName: 'Comercio-moz',
+      dbName: 'comercio-moz',
       useNewUrlParser: true,
       useUnifiedTopology: true,
 
