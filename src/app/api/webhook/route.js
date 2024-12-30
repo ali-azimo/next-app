@@ -1,62 +1,65 @@
-import { Webhook } from "svix";
-import { headers } from "next/headers";
-
+import { Webhook } from 'svix'
+import { headers } from 'next/headers'
 
 export async function POST(req) {
-    const SIGNING_SECRET = process.env.SIGNING_SECRET
+  const SIGNING_SECRET = process.env.SIGNING_SECRET
 
-    if(!SIGNING_SECRET){
-        throw new Error('Erro: Por favor adicone o SIGNING_SECRET no Clerk Dasboard no arquivo .env ou .env.local')
-    }
+  if (!SIGNING_SECRET) {
+    throw new Error('Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env.local')
+  }
 
-    //Crar no Svix no instant secrets
-    const wh = new Webhook(SIGNING_SECRET);
+  // Create new Svix instance with secret
+  const wh = new Webhook(SIGNING_SECRET)
 
-    //Ger header
-    const headerPayload = await headers();
-    const svix_id = headerPayload['svix-id'];
-    const svix_timestamp = headerPayload['svix-timestamp'];
-    const svix_signature = headerPayload['svix-signature'];
+  // Get headers
+  const headerPayload = await headers()
+  const svix_id = headerPayload.get('svix-id')
+  const svix_timestamp = headerPayload.get('svix-timestamp')
+  const svix_signature = headerPayload.get('svix-signature')
 
-    //Verificar se o webhook é valido
-    if(!svix_id || !svix_timestamp || !svix_signature){
-        return new Response('Erro: Falta de Svix Headers', {
-            status: 400,
-        })
-    }
-    //Obter dados do bobdy
-    const payload = await req.json();
-    const body = JSON.stringify(payload);
+  // If there are no headers, error out
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    return new Response('Error: Missing Svix headers', {
+      status: 400,
+    })
+  }
 
-    let evt
-    //Verificar payload
-    try{
-       evt = wh.verify(body,{
-            'svix_id':svix_id,
-            'svix_timestamp': svix_timestamp,
-            'svix_signature': svix_signature
-        })
-       }catch(err){
-        console.error('erro: Nao foi possivel verificar o webhook', err)
-        return new Response('Erro: Erro de verificacao', {
-            status: 400,
-        })
-       } 
-       //Verificar se o evento é valido com  payload
+  // Get body
+  const payload = await req.json()
+  const body = JSON.stringify(payload)
 
-       const {id} = evt.data;
-       const eventType = evt.type;
+  let evt
+
+  // Verify payload with headers
+  try {
+    evt = wh.verify(body, {
+      'svix-id': svix_id,
+      'svix-timestamp': svix_timestamp,
+      'svix-signature': svix_signature,
+    })
+  } catch (err) {
+    console.error('Error: Could not verify webhook:', err)
+    return new Response('Error: Verification error', {
+      status: 400,
+    })
+  }
+
+  // Do something with payload
+  // For this guide, log payload to console
+  const { id } = evt.data
+  const eventType = evt.type
+
 
     if(evt.type === 'user.created'){
-        console.log('Usuario criado');
+        console.log('Usuario criado com sucesso');
     }
     if(evt.type === 'user.updated'){
-        console.log('Usuario atualzado');
+        console.log('Usuario atualzado com sucesso');
     }
     if(evt.type === 'user.deleted'){
-        console.log('Usuario deletado');
+        console.log('Usuario deletado com sucesso');
     }
-       return new Response('Webhook recebido com sucesso', {
-           status: 200,
-       })
-    }
+
+
+  return new Response('Webhook received', { status: 200 })
+}
