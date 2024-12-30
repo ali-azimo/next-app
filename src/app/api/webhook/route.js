@@ -2,14 +2,14 @@ import { Webhook } from 'svix'
 import { headers } from 'next/headers'
 
 export async function POST(req) {
-  const SIGNING_SECRET = process.env.SECRET
+  const SIGNING_SECRET = process.env.SIGNING_SECRET
 
-  if (!SECRET) {
+  if (!SIGNING_SECRET) {
     throw new Error('Error: Please add SIGNING_SECRET from Clerk Dashboard to .env or .env.local')
   }
 
   // Create new Svix instance with secret
-  const wh = new Webhook(SECRET)
+  const wh = new Webhook(SIGNING_SECRET)
 
   // Get headers
   const headerPayload = await headers()
