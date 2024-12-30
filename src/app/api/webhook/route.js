@@ -1,5 +1,7 @@
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
+import { createOrUpdateUser, deleteUser } from '@/lib/actions/user'
+import { clerkClient } from '@clerk/nextjs/dist/types/server'
 
 export async function POST(req) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET
@@ -46,20 +48,52 @@ export async function POST(req) {
 
   // Do something with payload
   // For this guide, log payload to console
-  const { id } = evt.data
-  const eventType = evt.type
+  // o ? é para evitar erro de undefined
+  const { id } = evt?.data
+  const eventType = evt?.type
 
 
-    if(evt.type === 'user.created'){
-        console.log('Usuario criado com sucesso');
+    if(eventType === 'user.created' || eventType === 'user.updated'){
+      const { id, first_name, last_name, image_url, email_addresses } = evt?.data
+      try{
+        const user = await createOrUpdateUserr(
+          id, 
+          first_name, 
+          last_name, 
+          image_url, 
+          email_addresses
+          );
+          if(user && eventType === 'user.created'){
+            try{
+              await clerkClient.users.updateUserMetadata(id, {
+                publicMetadata:{
+                  userMongoId: user._id,
+                },
+            });
+      }catch(error){
+        console.log('Nao foi possivel criar ou atualizar o usuario usando metadataz', error);
+      }
     }
-    if(evt.type === 'user.updated'){
-        console.log('Usuario atualzado com sucesso');
-    }
-    if(evt.type === 'user.deleted'){
-        console.log('Usuario deletado com sucesso');
-    }
+  }catch(error){
+    console.log('Nao foi possivel criar ou atualizar o usuario', error);
+    return new Response('Error: Nao foi possivel criar ou atualizar usuario', {
+      status: 400,
+    });
+  }
+}
 
+//Deletar usuario
+if(eventType === 'user.deleted'){
+  try{
+    await deleteUser(id);
+  }catch(error){
+    console.log('Nao foi possivel deletar o usuario', error);
+    return new Response('Error: Nao foi possivel deletar usuario', {
+      status: 400,
+    });
+  }
+}
 
+  // Return response
   return new Response('Webhook received', { status: 200 })
 }
