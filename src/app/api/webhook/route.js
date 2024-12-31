@@ -70,7 +70,7 @@ export async function POST(req) {
                 },
             });
       }catch(error){
-        console.log('Nao foi possivel criar ou atualizar o usuario usando metadataz', error);
+        console.log('Nao foi possivel criar ou atualizar o usuario usando metadata', error);
       }
     }
   }catch(error){
