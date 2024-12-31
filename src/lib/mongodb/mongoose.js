@@ -16,7 +16,6 @@ export const connect = async () => {
       dbName: 'comercio-moz',
       useNewUrlParser: true,
       useUnifiedTopology: true,
-
     });
     initialized = true;
     console.log(`MongoDB conetado com sucesso`);
