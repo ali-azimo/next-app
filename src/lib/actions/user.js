@@ -1,5 +1,4 @@
 import User from "../models/user.model.js";
-
 import { connect } from "../mongodb/mongoose.js";
 
 export const createOrUpdateUser = async (
@@ -17,7 +16,7 @@ export const createOrUpdateUser = async (
                $set:{
                 firstName: first_name,
                 lastName: last_name,
-                profilePiture: image_url,
+                profileImage: image_url,
                 email: email_addresses[0].email
                }
             },

@@ -21,6 +21,6 @@ export const connect = async () => {
     initialized = true;
     console.log(`MongoDB conetado com sucesso`);
   } catch (err) {
-    console.log(`Erro ao conectar no MongoDB: ${err}`);
+    console.log("Erro ao conectar no MongoDB:", err);
   }
 };
